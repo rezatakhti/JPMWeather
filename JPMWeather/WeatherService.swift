@@ -61,17 +61,19 @@ extension APIProvider {
 
 class GetWeatherURLProvider : URLProvider {
     var path: String {
-        return "data/2.5/weather"
+        return "/data/2.5/weather"
     }
     
-    lazy var queryItems: [URLQueryItem] = [
+    var queryItems : [URLQueryItem] {
+        [
         URLQueryItem(name: "lat", value: lat),
         URLQueryItem(name: "lon", value: lon),
         URLQueryItem(name: "appid", value: "e40fb9763f108da8bc3f22c4e5484d9e")
-    ]
+        ]
+    }
     
-    let lat : String
-    let lon : String
+    var lat : String
+    var lon : String
     
     init(lat: String, lon: String) {
         self.lat = lat
@@ -84,7 +86,7 @@ class GetWeatherURLProvider : URLProvider {
 
 class WeatherService : APIProvider {
     
-    let urlProvider = GetWeatherURLProvider(lat: "??", lon: "??")
+    let urlProvider = GetWeatherURLProvider(lat: "", lon: "")
     
     func makeRequest(with completion: @escaping (Result<WeatherResponse, APIError>) -> Void) {
         load(urlProvider.url, withCompletion: completion)
@@ -104,26 +106,28 @@ struct Weather : Codable {
 
 class GetCoordinatesURLProvider: URLProvider {
     var path: String {
-        "geo/1.0/direct"
+        "/geo/1.0/direct"
     }
     
-    let input: String
+    var input: String
     
-    lazy var queryItems = [
-        URLQueryItem(name: "q", value: input),
-        URLQueryItem(name: "appid", value: "e40fb9763f108da8bc3f22c4e5484d9e")
-    ]
+    var queryItems : [URLQueryItem]  {
+        [
+            URLQueryItem(name: "q", value: input),
+            URLQueryItem(name: "limit", value: "5"),
+            URLQueryItem(name: "appid", value: "e40fb9763f108da8bc3f22c4e5484d9e")
+        ]
+    }
     
     init(input: String) {
         self.input = input
-        self.queryItems = queryItems
     }
 }
 
 class CoordinatesService: APIProvider {
     let urlProvider = GetCoordinatesURLProvider(input: "")
     
-    func makeRequest(with completion: @escaping (Result<GetCoordinatesResponse, APIError>) -> Void) {
+    func makeRequest(with completion: @escaping (Result<[GeoLocation], APIError>) -> Void) {
         load(urlProvider.url, withCompletion: completion)
     }
 }
